@@ -25,8 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#define osObjectsPublic  // define objects in main module
-#include "osObjects.h"   // RTOS object definitions
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -96,7 +95,7 @@ int main(void)
   MX_USART3_UART_Init();
   MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
-
+  app_main();
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -14,11 +14,11 @@
 /*
  * Define the Device Header File: 
  */
-#define CMSIS_device_header "stm32f10x.h"
+//#define CMSIS_device_header "stm32f10x.h"
 
-/*  ARM::CMSIS:RTOS:Keil RTX:4.82.0 */
-#define RTE_CMSIS_RTOS                  /* CMSIS-RTOS */
-        #define RTE_CMSIS_RTOS_RTX              /* CMSIS-RTOS Keil RTX */
+/*  ARM::CMSIS:RTOS2:Keil RTX5:Library:5.5.2 */
+#define RTE_CMSIS_RTOS2                 /* CMSIS-RTOS2 */
+        #define RTE_CMSIS_RTOS2_RTX5            /* CMSIS-RTOS2 Keil RTX5 */
 
 
 #endif /* RTE_COMPONENTS_H */

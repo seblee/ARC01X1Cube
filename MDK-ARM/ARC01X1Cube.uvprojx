@@ -173,7 +173,7 @@
             <GenPPlst>0</GenPPlst>
             <AdsCpuType>"Cortex-M3"</AdsCpuType>
             <RvctDeviceName />
-            <mOS>1</mOS>
+            <mOS>0</mOS>
             <uocRom>0</uocRom>
             <uocRam>0</uocRam>
             <hadIROM>1</hadIROM>
@@ -185,7 +185,7 @@
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -376,6 +376,19 @@
         </TargetArmAds>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>APP</GroupName>
+        </Group>
+        <Group>
+          <GroupName>RTX</GroupName>
+          <Files>
+            <File>
+              <FileName>app_main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\RTX\app_main.c</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Application/MDK-ARM</GroupName>
           <Files>
@@ -1315,7 +1328,7 @@
   </Targets>
   <RTE>
     <apis>
-      <api Capiversion="1.0.0" Cclass="CMSIS" Cgroup="RTOS" exclusive="1">
+      <api Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" exclusive="1">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.7.0" />
         <targetInfos>
           <targetInfo name="ARC01X1Cube" />
@@ -1329,7 +1342,7 @@
           <targetInfo name="ARC01X1Cube" />
         </targetInfos>
       </component>
-      <component Capiversion="1.0.0" Cclass="CMSIS" Cgroup="RTOS" Csub="Keil RTX" Cvendor="ARM" Cversion="4.82.0" condition="RTOS RTX">
+      <component Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" Csub="Keil RTX5" Cvariant="Library" Cvendor="ARM" Cversion="5.5.2" condition="RTOS2 RTX5">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.7.0" />
         <targetInfos>
           <targetInfo name="ARC01X1Cube" />
@@ -1338,8 +1351,22 @@
     </components>
     <files>
       <file attr="config" category="source" name="CMSIS\RTOS\RTX\Templates\RTX_Conf_CM.c" version="4.70.1">
-        <instance index="0">RTE\CMSIS\RTX_Conf_CM.c</instance>
+        <instance index="0" removed="1">RTE\CMSIS\RTX_Conf_CM.c</instance>
         <component Capiversion="1.0.0" Cclass="CMSIS" Cgroup="RTOS" Csub="Keil RTX" Cvendor="ARM" Cversion="4.82.0" condition="RTOS RTX" isDefaultVariant="1" />
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.7.0" />
+        <targetInfos />
+      </file>
+      <file attr="config" category="source" name="CMSIS\RTOS2\RTX\Config\RTX_Config.c" version="5.1.0">
+        <instance index="0">RTE\CMSIS\RTX_Config.c</instance>
+        <component Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" Csub="Keil RTX5" Cvariant="Library" Cvendor="ARM" Cversion="5.5.2" condition="RTOS2 RTX5" />
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.7.0" />
+        <targetInfos>
+          <targetInfo name="ARC01X1Cube" />
+        </targetInfos>
+      </file>
+      <file attr="config" category="header" name="CMSIS\RTOS2\RTX\Config\RTX_Config.h" version="5.5.1">
+        <instance index="0">RTE\CMSIS\RTX_Config.h</instance>
+        <component Capiversion="2.1.3" Cclass="CMSIS" Cgroup="RTOS2" Csub="Keil RTX5" Cvariant="Library" Cvendor="ARM" Cversion="5.5.2" condition="RTOS2 RTX5" />
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.7.0" />
         <targetInfos>
           <targetInfo name="ARC01X1Cube" />
