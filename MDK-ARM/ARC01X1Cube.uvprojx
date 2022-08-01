@@ -378,6 +378,18 @@
       <Groups>
         <Group>
           <GroupName>APP</GroupName>
+          <Files>
+            <File>
+              <FileName>u1Thread.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\u1Thread.c</FilePath>
+            </File>
+            <File>
+              <FileName>northTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\northTask.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>RTX</GroupName>

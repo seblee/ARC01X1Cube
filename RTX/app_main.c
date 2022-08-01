@@ -8,12 +8,13 @@
 #endif
 #endif
 
+#include "app_main.h"
 #include "cmsis_os2.h"
 #include "iwdg.h"
 
 static const osThreadAttr_t ThreadAttr_start_main = {"app_main", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
-osThreadId_t                u1Tid;  // thread id
-static const osThreadAttr_t ThreadAttr_u1Thread = {"u1Thread", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
+osThreadId_t                northTaskTid;  // thread id
+static const osThreadAttr_t ThreadAttr_northTask = {"northTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
 
 /*----------------------------------------------------------------------------
  * Application main thread
@@ -23,8 +24,8 @@ __NO_RETURN static void start_main(void *argument)
     (void)argument;
     // ...
 
-    u1Tid = osThreadNew(u1Thread, NULL, &ThreadAttr_u1Thread);
-    if (u1Tid == NULL) {
+    northTaskTid = osThreadNew(northTask, NULL, &ThreadAttr_northTask);
+    if (northTaskTid == NULL) {
     }
 
     for (;;) {
