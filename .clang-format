@@ -73,7 +73,7 @@ BreakBeforeBraces: Custom
 
 # 大括号换行，只有当BreakBeforeBraces设置为Custom时才有效
 BraceWrapping:
-  AfterCaseLabel: true
+  AfterCaseLabel: false
   AfterClass: true
   AfterControlStatement: false
   AfterEnum: false
@@ -87,3 +87,4 @@ BraceWrapping:
   IndentBraces: false  
   # Keeps extern "C" blocks unindented.
   AfterExternBlock: false
+AlignArrayOfStructures: Left
