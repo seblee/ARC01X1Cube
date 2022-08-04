@@ -52,6 +52,6 @@
 /* Private user code ---------------------------------------------------------*/
 
 void northTask(void *argument);  // thread function
-
+void uartRxTask(void *argument);
 
 #endif

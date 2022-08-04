@@ -33,7 +33,7 @@ BraceWrapping:
   BeforeElse: false
   IndentBraces: false  
   # Keeps extern "C" blocks unindented.
-  AfterExternBlock: false
+  AfterExternBlock: false 
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false

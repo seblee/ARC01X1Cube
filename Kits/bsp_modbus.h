@@ -12,11 +12,8 @@
 */
 #ifndef __MOSBUS_HOST_H
 #define __MOSBUS_HOST_H
-#include "cmsis_os2.h"  // CMSIS RTOS header file
 
-#define SlaveHMIAddr   0x01 /* 面板作为时，主板作从机 */
-#define SlaveBoardAddr 0x02 /* 面板作为时，主板作从机 */
-#define HBAUD485       UART2_BAUD
+#include "userData.h"
 
 /* 01H 读强制单线圈 */
 /* 05H 写强制单线圈 */
@@ -54,11 +51,17 @@
 #define RSP_ERR_VALUE    0x03 /* 数据值域错误 */
 #define RSP_ERR_WRITE    0x04 /* 写入失败 */
 
-#define H_RX_BUF_SIZE 64
-#define H_TX_BUF_SIZE 128
+#define MOD_01H 0x01  //读线圈
+#define MOD_02H 0x02  //读离散输入
+#define MOD_03H 0x03  //读保持寄存器
+#define MOD_04H 0x04  //读输入寄存器
+#define MOD_05H 0x05  //写线圈
+#define MOD_06H 0x06  //写单个保持寄存器
+#define MOD_0FH 0x0F  //写多个线圈
+#define MOD_10H 0x10  //写多个保持寄存器
 
 typedef struct {
-    uint8_t RxBuf[H_RX_BUF_SIZE];
+    uint8_t RxBuf[MOD_BUF_SIZE];
     uint8_t RxCount;
     uint8_t RxStatus;
     uint8_t RxNewFlag;
@@ -66,7 +69,7 @@ typedef struct {
     uint32_t Baud;
     uint8_t  RspCode;
 
-    uint8_t TxBuf[H_TX_BUF_SIZE];
+    uint8_t TxBuf[MOD_BUF_SIZE];
     uint8_t TxCount;
 
     uint16_t Reg01H; /* 保存主机发送的寄存器首地址 */
@@ -84,9 +87,11 @@ typedef struct {
     uint8_t fAck06H;
     uint8_t fAck10H;
 
-    uint8_t WorkMode; /* 接收中断的工作模式： ASCII, MODBUS主机或 MODBUS 从机 */
-    uint8_t id;
-    uint8_t g_rtu_timeout;
+    uint8_t      WorkMode; /* 接收中断的工作模式： ASCII, MODBUS主机或 MODBUS 从机 */
+    uint8_t      id;
+    uint8_t      g_rtu_timeout;
+    osThreadId_t threadId;
+    int (*transmit)(uint8_t *_buf, uint16_t _len);
 
 } MODBUS_T;
 
@@ -109,20 +114,21 @@ typedef struct {
 
 } VAR_T;
 
+void MODBUS_InitVar(MODBUS_T *_tmod, uint8_t _id, uint32_t _Baud, uint8_t _WorkMode);
+
 void    MODBUS_Poll(MODBUS_T *tmod);
-uint8_t MODH_ReadParam_01H(uint16_t _reg, uint16_t _num);
-uint8_t MODH_ReadParam_02H(uint16_t _reg, uint16_t _num);
-uint8_t MODH_ReadParam_03H(uint8_t _addr, uint16_t _reg, uint16_t _num);
-uint8_t MODH_ReadParam_04H(uint16_t _reg, uint16_t _num);
-uint8_t MODH_WriteParam_05H(uint16_t _reg, uint16_t _value);
-uint8_t MODH_WriteParam_06H(uint8_t _addr, uint16_t _reg, uint16_t _value);
-uint8_t MODH_WriteParam_10H(uint8_t _addr, uint16_t _reg, uint8_t _num, uint8_t *_buf);
+uint8_t MODH_ReadParam_01H(MODBUS_T *_tmod, uint8_t _id, uint16_t _reg, uint16_t _num);
+uint8_t MODH_ReadParam_02H(MODBUS_T *_tmod, uint8_t _id, uint16_t _reg, uint16_t _num);
+uint8_t MODH_ReadParam_03H(MODBUS_T *_tmod, uint8_t _id, uint16_t _reg, uint16_t _num);
+uint8_t MODH_ReadParam_04H(MODBUS_T *_tmod, uint8_t _id, uint16_t _reg, uint16_t _num);
+uint8_t MODH_WriteParam_05H(MODBUS_T *_tmod, uint8_t _id, uint16_t _reg, uint16_t _value);
+uint8_t MODH_WriteParam_06H(MODBUS_T *_tmod, uint8_t _id, uint16_t _reg, uint16_t _value);
+uint8_t MODH_WriteParam_10H(MODBUS_T *_tmod, uint8_t _id, uint16_t _reg, uint8_t _num, uint8_t *_buf);
 
 void MODBUS_RxData(MODBUS_T *tmod, uint8_t *src, uint8_t len);
 void MODBUS_RxTimeOut(MODBUS_T *tmod);
 
-extern MODBUS_T g_tModH;
-extern VAR_T    g_tVar[2];
+extern VAR_T g_tVar[2];
 
 #endif
 
