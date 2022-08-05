@@ -595,6 +595,7 @@ void MODH_03Handle(MODBUS_T *_tmod)
 {
     if (_tmod->RxCount > 0) {
         _tmod->fAck03H = 1;
+        // memcpy(&modbusVar[_tmod->Reg03H], &_tmod->RxBuf[3], _tmod->RxBuf[2]);
     }
 }
 
@@ -1070,7 +1071,7 @@ static void MODDevice_03H(MODBUS_T *_tmod)
         _tmod->TxBuf[_tmod->TxCount++] = _tmod->RxBuf[0];
         _tmod->TxBuf[_tmod->TxCount++] = 0x03;
         _tmod->TxBuf[_tmod->TxCount++] = _tmod->RegNum * 2;
-        memcpy(&_tmod->TxBuf[_tmod->TxCount], &modbusVar, _tmod->TxBuf[2]);
+        memcpy(&_tmod->TxBuf[_tmod->TxCount], &modbusVar[_tmod->Reg03H], _tmod->TxBuf[2]);
         _tmod->TxCount += _tmod->TxBuf[2];
     }
     MODSendAckWithCRC(_tmod); /* 发送数据，自动加CRC */

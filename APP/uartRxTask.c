@@ -85,7 +85,6 @@ void uartRxTask(void *argument)
     while (1) {
         osStatus_t status;
         uint32_t   dataOut;
-        uint8_t    priority;
         status = osMessageQueueGet(mid_MsgRx, &dataOut, NULL, 0U);  // wait for message
         if (status == osOK) {
             uint8_t cache[MOD_BUF_SIZE];

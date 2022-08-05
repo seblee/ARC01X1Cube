@@ -40,6 +40,20 @@
 /* Private includes ----------------------------------------------------------*/
 #include "sys.h"
 /* Private typedef -----------------------------------------------------------*/
+typedef struct {
+    uint8_t  id;
+    uint8_t  funCode;
+    uint16_t Num;
+    uint16_t Reg;
+    uint8_t  offset;
+    uint8_t *buf;
+} modbusTable_t;
+
+typedef struct {
+    uint8_t Src;
+    uint8_t Dec;
+    uint8_t len;
+} MOD_VARTab_t;
 
 /* Private define ------------------------------------------------------------*/
 #define MOD_BUF_SIZE 300

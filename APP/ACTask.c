@@ -47,8 +47,32 @@
 
 /* Private variables ---------------------------------------------------------*/
 MODBUS_T ACMod = {0};
+
+const modbusTable_t ACTable03H[] = {
+  /**id  code   Num reg offset buf**/
+    {1, MOD_03H, 5, 0,  0, 0},
+    {1, MOD_03H, 2, 7,  3, 0},
+    {1, MOD_03H, 7, 12, 4, 0},
+    {1, MOD_03H, 1, 40, 6, 0},
+    {1, MOD_03H, 4, 45, 7, 0},
+};
+#define ACTable03H_LENGTH sizeof(ACTable03H) / sizeof(modbusTable_t)
+
+const MOD_VARTab_t AC_VARTab[] = {
+  /* S   D  Len*/
+    {0,  33, 2}, //  0
+    {2,  37, 1}, //  1
+    {3,  17, 2}, //  2
+    {7,  19, 2}, //  3
+    {12, 16, 1}, //  4
+    {13, 24, 6}, //  5
+    {40, 21, 1}, //  6
+    {45, 40, 4}, //  7
+};
+#define AC_VARTab_LENGTH sizeof(AC_VARTab) / sizeof(MOD_VARTab_t)
+
 /* Public variables ----------------------------------------------------------*/
-extern osThreadId_t ACTaskTid;  // thread id
+
 /* Private function prototypes -----------------------------------------------*/
 static int U2SendBuf(uint8_t *_buf, uint16_t _len);
 /* Private user code ---------------------------------------------------------*/
@@ -59,15 +83,29 @@ static int U2SendBuf(uint8_t *_buf, uint16_t _len);
 
 void ACTask(void *argument)
 {
+    uint8_t i, index;
+    uint8_t count = 0;
     MODBUS_InitVar(&ACMod, 1, 19200, WKM_MODBUS_HOST);
     ACMod.transmit = U2SendBuf;
     USART2_DIR_RX;
 
     while (1) {
-        osDelay(500);  // Insert thread code here...
-        if (MODH_ReadParam_03H(&ACMod, 1, 100, 2) == 1) { 
-        } else {
-            // time out
+        osDelay(999);  // Insert thread code here...
+        for (i = 0; i < ACTable03H_LENGTH; i++) {
+            if (MODH_ReadParam_03H(&ACMod, ACTable03H[i].id, ACTable03H[i].Reg, ACTable03H[i].Num) == 1) {
+                uint16_t *p = (uint16_t *)(&ACMod.RxBuf[3]);
+                index       = ACTable03H[i].offset;
+                count       = 0;
+                do {
+                    memcpy(&modbusVar[AC_VARTab[index].Dec], p, AC_VARTab[index].len * 2);
+                    count += AC_VARTab[index].len;
+                    p += AC_VARTab[index].len;
+                    index++;
+                } while ((index >= AC_VARTab_LENGTH) || (count < ACTable03H[i].Num));
+                osDelay(50);
+            } else {
+                // time out
+            }
         }
 
         osThreadYield();  // suspend thread
