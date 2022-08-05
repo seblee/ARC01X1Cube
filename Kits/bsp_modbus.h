@@ -128,8 +128,6 @@ uint8_t MODH_WriteParam_10H(MODBUS_T *_tmod, uint8_t _id, uint16_t _reg, uint8_t
 void MODBUS_RxData(MODBUS_T *tmod, uint8_t *src, uint8_t len);
 void MODBUS_RxTimeOut(MODBUS_T *tmod);
 
-extern VAR_T g_tVar[2];
-
 #endif
 
 /***************************** 安富莱电子 www.armfly.com (END OF FILE) *********************************/

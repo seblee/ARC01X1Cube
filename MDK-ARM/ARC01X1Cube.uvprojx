@@ -392,6 +392,11 @@
               <FileType>1</FileType>
               <FilePath>..\APP\uartRxTask.c</FilePath>
             </File>
+            <File>
+              <FileName>ACTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\ACTask.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -401,6 +406,11 @@
               <FileName>app_main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\RTX\app_main.c</FilePath>
+            </File>
+            <File>
+              <FileName>MsgQueue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\RTX\MsgQueue.c</FilePath>
             </File>
           </Files>
         </Group>

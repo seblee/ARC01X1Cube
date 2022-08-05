@@ -53,5 +53,7 @@
 
 void northTask(void *argument);  // thread function
 void uartRxTask(void *argument);
+void ACTask(void *argument);
+int  Init_MsgQueue(void);
 
 #endif

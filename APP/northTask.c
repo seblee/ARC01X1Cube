@@ -49,15 +49,14 @@
 
 /* Private variables ---------------------------------------------------------*/
 uint32_t northTaskEvent;
-MODBUS_T northMod;
+MODBUS_T northMod = {0};
 
 uint16_t modbusVar[MOD_VAR_SIZE] = {0X1234};
 /* Public variables ----------------------------------------------------------*/
 extern osThreadId_t northTaskTid;
-extern uint8_t      USART1_Tx_buf[MOD_BUF_SIZE];
 /* Private function prototypes -----------------------------------------------*/
 
-static int RS485_SendBuf(uint8_t *_buf, uint16_t _len);
+static int U1SendBuf(uint8_t *_buf, uint16_t _len);
 /* Private user code ---------------------------------------------------------*/
 /*----------------------------------------------------------------------------
  *      Thread 1 'Thread_Name': Sample thread
@@ -66,7 +65,8 @@ static int RS485_SendBuf(uint8_t *_buf, uint16_t _len);
 void northTask(void *argument)
 {
     MODBUS_InitVar(&northMod, 1, 19200, WKM_MODBUS_DEVICE);
-    northMod.transmit = RS485_SendBuf;
+    northMod.transmit = U1SendBuf;
+    northMod.threadId = northTaskTid;
 
     while (1) {
         northTaskEvent = osThreadFlagsWait(1, osFlagsWaitAny, 150);
@@ -76,7 +76,7 @@ void northTask(void *argument)
     }
 }
 
-static int RS485_SendBuf(uint8_t *_buf, uint16_t _len)
+static int U1SendBuf(uint8_t *_buf, uint16_t _len)
 {
     HAL_StatusTypeDef rc;
     // UART_DIR4_TX;  // 485_DIR4

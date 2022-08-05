@@ -65,8 +65,6 @@ static void MODDevice_06H(MODBUS_T *_tmod);
 static void MODDevice_0FH(MODBUS_T *_tmod);
 static void MODDevice_10H(MODBUS_T *_tmod);
 
-VAR_T g_tVar[2];
-
 /*
 *********************************************************************************************************
 *	函 数 名: MODBUS_InitVar
@@ -84,6 +82,8 @@ void MODBUS_InitVar(MODBUS_T *_tmod, uint8_t _id, uint32_t _Baud, uint8_t _WorkM
     _tmod->id            = _id;
     _tmod->Baud          = _Baud;
     _tmod->WorkMode      = _WorkMode; /* 接收数据帧不进行CRC校验 */
+
+    _tmod->threadId = osThreadGetId();
 }
 
 /*
@@ -472,14 +472,8 @@ void MODBUS_Poll(MODBUS_T *_tmod)
             04 57 :  数据,,,转换成 10 进制是 1111.高位在前,
             3B70  :  二个字节 CRC 码	从05到 57的校验
     */
-    if (_tmod->WorkMode == WKM_MODBUS_HOST) {
-        if (_tmod->RxCount < 4) {
-            goto err_ret;
-        }
-    } else if (_tmod->WorkMode == WKM_MODBUS_DEVICE) {
-        if (_tmod->RxCount < 8) {
-            goto err_ret;
-        }
+    if (_tmod->RxCount < 4) {
+        goto err_ret;
     }
 
     for (i = 0; i < _tmod->RxCount; i++) {
@@ -489,14 +483,8 @@ void MODBUS_Poll(MODBUS_T *_tmod)
             break;
         }
     }
-    if (_tmod->WorkMode == WKM_MODBUS_HOST) {
-        if (_tmod->RxCount < 4) {
-            goto err_ret;
-        }
-    } else if (_tmod->WorkMode == WKM_MODBUS_DEVICE) {
-        if (_tmod->RxCount < 8) {
-            goto err_ret;
-        }
+    if (_tmod->RxCount < 4) {
+        goto err_ret;
     }
     /* 计算CRC校验和 */
     crc1 = CRC16_Modbus(_tmod->RxBuf, _tmod->RxCount);
@@ -526,29 +514,8 @@ err_ret:
 */
 static void MODH_01Handle(MODBUS_T *_tmod)
 {
-    uint8_t  bytes;
-    uint8_t *p;
-
     if (_tmod->RxCount > 0) {
-        bytes = _tmod->RxBuf[2]; /* 数据长度 字节数 */
-        switch (_tmod->Reg01H) {
-            case REG_D01:
-                if (bytes >= 1) {
-                    p = &_tmod->RxBuf[3];
-
-                    g_tVar[_tmod->RxBuf[0] - 1].D01 = BEBufToUint16(p);
-                    p += 2; /* 寄存器 */
-                    g_tVar[_tmod->RxBuf[0] - 1].D02 = BEBufToUint16(p);
-                    p += 2; /* 寄存器 */
-                    g_tVar[_tmod->RxBuf[0] - 1].D03 = BEBufToUint16(p);
-                    p += 2; /* 寄存器 */
-                    g_tVar[_tmod->RxBuf[0] - 1].D04 = BEBufToUint16(p);
-                    p += 2; /* 寄存器 */
-
-                    _tmod->fAck01H = 1;
-                }
-                break;
-        }
+        _tmod->fAck01H = 1;
     }
 }
 
@@ -562,27 +529,8 @@ static void MODH_01Handle(MODBUS_T *_tmod)
 */
 static void MODH_02Handle(MODBUS_T *_tmod)
 {
-    uint8_t  bytes;
-    uint8_t *p;
-
     if (_tmod->RxCount > 0) {
-        bytes = _tmod->RxBuf[2]; /* 数据长度 字节数 */
-        switch (_tmod->Reg02H) {
-            case REG_T01:
-                if (bytes == 6) {
-                    p = &_tmod->RxBuf[3];
-
-                    g_tVar[_tmod->RxBuf[0] - 1].T01 = BEBufToUint16(p);
-                    p += 2; /* 寄存器 */
-                    g_tVar[_tmod->RxBuf[0] - 1].T02 = BEBufToUint16(p);
-                    p += 2; /* 寄存器 */
-                    g_tVar[_tmod->RxBuf[0] - 1].T03 = BEBufToUint16(p);
-                    p += 2; /* 寄存器 */
-
-                    _tmod->fAck02H = 1;
-                }
-                break;
-        }
+        _tmod->fAck02H = 1;
     }
 }
 
@@ -596,23 +544,8 @@ static void MODH_02Handle(MODBUS_T *_tmod)
 */
 static void MODH_04Handle(MODBUS_T *_tmod)
 {
-    uint8_t  bytes;
-    uint8_t *p;
-
     if (_tmod->RxCount > 0) {
-        bytes = _tmod->RxBuf[2]; /* 数据长度 字节数 */
-        switch (_tmod->Reg04H) {
-            case REG_T01:
-                if (bytes == 2) {
-                    p = &_tmod->RxBuf[3];
-
-                    g_tVar[_tmod->RxBuf[0] - 1].A01 = BEBufToUint16(p);
-                    p += 2; /* 寄存器 */
-
-                    _tmod->fAck04H = 1;
-                }
-                break;
-        }
+        _tmod->fAck04H = 1;
     }
 }
 
@@ -660,15 +593,7 @@ static void MODH_06Handle(MODBUS_T *_tmod)
 */
 void MODH_03Handle(MODBUS_T *_tmod)
 {
-    uint8_t *p, bytes, i;
-
     if (_tmod->RxCount > 0) {
-        bytes = _tmod->RxBuf[2]; /* 数据长度 字节数 */
-        p     = &_tmod->RxBuf[3];
-        for (i = 0; i < (bytes / 2); i++) {
-            g_tVar[_tmod->RxBuf[0] - 1].P01[i] = BEBufToUint16(p);
-            p += 2; /* 寄存器 */
-        }
         _tmod->fAck03H = 1;
     }
 }
@@ -1102,10 +1027,11 @@ uint8_t MODH_WriteParam_10H(MODBUS_T *_tmod, uint8_t _id, uint16_t _reg, uint8_t
 }
 
 /***************************** 安富莱电子 www.armfly.com (END OF FILE) *********************************/
-
+osThreadId_t  idCache = 0;
 static int8_t waitResponse(uint8_t ModCmd)
 {
     uint32_t Event;
+    idCache = osThreadGetId();
     // osSignalClear(tid_testThread, ModCmd);
     Event = osThreadFlagsWait(ModCmd, osFlagsWaitAny, 200);  // wait for message
     if (Event == osFlagsErrorTimeout) {
