@@ -83,11 +83,9 @@ static int U2SendBuf(uint8_t *_buf, uint16_t _len);
 
 void ACTask(void *argument)
 {
-    uint8_t i, index;
-    uint8_t count = 0;
+    uint8_t i, index, count = 0;
     MODBUS_InitVar(&ACMod, 1, 19200, WKM_MODBUS_HOST);
     ACMod.transmit = U2SendBuf;
-    USART2_DIR_RX;
 
     while (1) {
         osDelay(999);  // Insert thread code here...

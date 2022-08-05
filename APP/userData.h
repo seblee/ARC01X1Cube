@@ -65,17 +65,23 @@ typedef struct {
 
 #define USART2_DIR_TX HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET)
 #define USART2_DIR_RX HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET)
+
+#define USART3_DIR_TX HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET)
+#define USART3_DIR_RX HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET)
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
 /* Public variables ----------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart2_rx;
+extern DMA_HandleTypeDef hdma_usart3_rx;
 
 extern uint8_t  USART1_Rx_buf[MOD_BUF_SIZE];
 extern uint8_t  USART1_Tx_buf[MOD_BUF_SIZE];
 extern uint8_t  USART2_Rx_buf[MOD_BUF_SIZE];
 extern uint8_t  USART2_Tx_buf[MOD_BUF_SIZE];
+extern uint8_t  USART3_Rx_buf[MOD_BUF_SIZE];
+extern uint8_t  USART3_Tx_buf[MOD_BUF_SIZE];
 extern uint16_t modbusVar[MOD_VAR_SIZE];
 /* Private function prototypes -----------------------------------------------*/
 

@@ -12,13 +12,15 @@
 #include "cmsis_os2.h"
 #include "iwdg.h"
 
-static const osThreadAttr_t       ThreadAttr_start_main = {"app_main", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
-osThreadId_t                      northTaskTid;  // thread id
-static const osThreadAttr_t       ThreadAttr_northTask = {"northTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
-osThreadId_t                      uartRxTaskTid;  // thread id
-static const osThreadAttr_t       ThreadAttr_uartRxTask = {"uartRxTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
-osThreadId_t                      ACTaskTid;  // thread id
-static const osThreadAttr_t       ThreadAttr_ACTask = {"ACTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
+static const osThreadAttr_t ThreadAttr_start_main = {"app_main", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
+osThreadId_t                northTaskTid;  // thread id
+static const osThreadAttr_t ThreadAttr_northTask = {"northTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
+osThreadId_t                uartRxTaskTid;  // thread id
+static const osThreadAttr_t ThreadAttr_uartRxTask = {"uartRxTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
+osThreadId_t                ACTaskTid;  // thread id
+static const osThreadAttr_t ThreadAttr_ACTask = {"ACTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
+osThreadId_t                ipmTaskTid;  // thread id
+static const osThreadAttr_t ThreadAttr_ipmTask = {"ipmTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
 
 /*----------------------------------------------------------------------------
  * Application main thread
@@ -37,6 +39,9 @@ __NO_RETURN static void start_main(void *argument)
     }
     ACTaskTid = osThreadNew(ACTask, NULL, &ThreadAttr_ACTask);
     if (ACTaskTid == NULL) {
+    }
+    ipmTaskTid = osThreadNew(ipmTask, NULL, &ThreadAttr_ipmTask);
+    if (ipmTaskTid == NULL) {
     }
 
     for (;;) {

@@ -45,6 +45,7 @@
 /* Private define ------------------------------------------------------------*/
 #define U1RXFLAG 0x00000001U
 #define U2RXFLAG 0x00000002U
+#define U3RXFLAG 0x00000003U
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -53,14 +54,21 @@ uint8_t  USART1_Rx_buf[MOD_BUF_SIZE];
 uint8_t  USART1_Tx_buf[MOD_BUF_SIZE];
 fifo_s_t uart1RxFifo;
 uint8_t  uart1RxFifoBuf[MOD_BUF_SIZE];
+
 uint8_t  USART2_Rx_buf[MOD_BUF_SIZE];
 uint8_t  USART2_Tx_buf[MOD_BUF_SIZE];
 fifo_s_t uart2RxFifo;
 uint8_t  uart2RxFifoBuf[MOD_BUF_SIZE];
 
+uint8_t  USART3_Rx_buf[MOD_BUF_SIZE];
+uint8_t  USART3_Tx_buf[MOD_BUF_SIZE];
+fifo_s_t uart3RxFifo;
+uint8_t  uart3RxFifoBuf[MOD_BUF_SIZE];
+
 /* Public variables ----------------------------------------------------------*/
 extern MODBUS_T northMod;
 extern MODBUS_T ACMod;
+extern MODBUS_T ipmMod;
 
 extern osMessageQueueId_t mid_MsgRx;
 /* Private function prototypes -----------------------------------------------*/
@@ -74,11 +82,12 @@ static void uartDMAStart(DMA_HandleTypeDef *hdma, UART_HandleTypeDef *huart, uin
 
 void uartRxTask(void *argument)
 {
-
     USART1_DIR_RX;
     fifo_s_init(&uart1RxFifo, uart1RxFifoBuf, MOD_BUF_SIZE);
     USART2_DIR_RX;
     fifo_s_init(&uart2RxFifo, uart2RxFifoBuf, MOD_BUF_SIZE);
+    USART3_DIR_RX;
+    fifo_s_init(&uart3RxFifo, uart3RxFifoBuf, MOD_BUF_SIZE);
 
     uartDMAStart(&hdma_usart1_rx, &huart1, USART1_Rx_buf, MOD_BUF_SIZE);
     uartDMAStart(&hdma_usart2_rx, &huart2, USART2_Rx_buf, MOD_BUF_SIZE);
@@ -97,8 +106,11 @@ void uartRxTask(void *argument)
                 length = fifo_s_used(&uart2RxFifo);
                 fifo_s_gets(&uart2RxFifo, (char *)cache, length);
                 MODBUS_RxData(&ACMod, cache, length);
+            } else if (dataOut == U3RXFLAG) {
+                length = fifo_s_used(&uart3RxFifo);
+                fifo_s_gets(&uart3RxFifo, (char *)cache, length);
+                MODBUS_RxData(&ipmMod, cache, length);
             }
-            // osEventFlagsClear (evt_id, U1RXFLAG|U2RXFLAG);
         }
     }
 }
@@ -126,6 +138,12 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         osMessageQueuePut(mid_MsgRx, &dataIn, 0U, 0U);
         uartDMAStart(&hdma_usart2_rx, &huart2, USART2_Rx_buf, MOD_BUF_SIZE);
     }
+    if (huart == &huart3) {
+        fifo_s_puts(&uart3RxFifo, (char *)USART3_Rx_buf, Size);  //数据填入 FIFO
+        dataIn = U3RXFLAG;
+        osMessageQueuePut(mid_MsgRx, &dataIn, 0U, 0U);
+        uartDMAStart(&hdma_usart3_rx, &huart3, USART3_Rx_buf, MOD_BUF_SIZE);
+    }
 }
 
 static void uartDMAStart(DMA_HandleTypeDef *hdma, UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
@@ -140,9 +158,10 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     UNUSED(huart);
     if (huart == &huart1) {
         USART1_DIR_RX;
-    }
-    if (huart == &huart2) {
+    } else if (huart == &huart2) {
         USART2_DIR_RX;
+    } else if (huart == &huart3) {
+        USART3_DIR_RX;
     }
     /* NOTE: This function should not be modified, when the callback is needed,
              the HAL_UART_TxCpltCallback could be implemented in the user file
