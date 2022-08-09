@@ -99,7 +99,7 @@ void ACTask(void *argument)
                     count += AC_VARTab[index].len;
                     p += AC_VARTab[index].len;
                     index++;
-                } while ((index >= AC_VARTab_LENGTH) || (count < ACTable03H[i].Num));
+                } while ((index < AC_VARTab_LENGTH) && (count < ACTable03H[i].Num));
                 osDelay(50);
             } else {
                 // time out

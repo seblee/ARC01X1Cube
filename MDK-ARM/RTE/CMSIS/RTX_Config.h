@@ -44,7 +44,7 @@
 //   <i> Defines the combined global dynamic memory size.
 //   <i> Default: 32768
 #ifndef OS_DYNAMIC_MEM_SIZE
-#define OS_DYNAMIC_MEM_SIZE         4096
+#define OS_DYNAMIC_MEM_SIZE         8192
 #endif
  
 //   <o>Kernel Tick Frequency [Hz] <1-1000000>
@@ -107,7 +107,7 @@
 //     <i> Defines maximum number of user threads with default stack size.
 //     <i> Applies to user threads with zero stack size specified.
 #ifndef OS_THREAD_DEF_STACK_NUM
-#define OS_THREAD_DEF_STACK_NUM     0
+#define OS_THREAD_DEF_STACK_NUM     256
 #endif
  
 //     <o>Total Stack size [bytes] for user Threads with user-provided Stack size <0-1073741824:8>
@@ -115,7 +115,7 @@
 //     <i> Applies to user threads with user-provided stack size and system provided memory for stack.
 //     <i> Default: 0
 #ifndef OS_THREAD_USER_STACK_SIZE
-#define OS_THREAD_USER_STACK_SIZE   0
+#define OS_THREAD_USER_STACK_SIZE   256
 #endif
  
 //   </e>
@@ -153,7 +153,7 @@
 //   <i> Initializes thread stack with watermark pattern for analyzing stack usage.
 //   <i> Enabling this option increases significantly the execution time of thread creation.
 #ifndef OS_STACK_WATERMARK
-#define OS_STACK_WATERMARK          0
+#define OS_STACK_WATERMARK          1
 #endif
  
 //   <o>Processor mode for Thread execution 
@@ -498,7 +498,7 @@
 //     <q>Memory Management
 //     <i> Enables Memory Management event generation.
 #ifndef OS_EVR_MEMORY
-#define OS_EVR_MEMORY               1
+#define OS_EVR_MEMORY               0
 #endif
  
 //     <q>Kernel
@@ -528,31 +528,31 @@
 //     <q>Event Flags
 //     <i> Enables Event Flags event generation.
 #ifndef OS_EVR_EVFLAGS
-#define OS_EVR_EVFLAGS              1
+#define OS_EVR_EVFLAGS              0
 #endif
  
 //     <q>Timer
 //     <i> Enables Timer event generation.
 #ifndef OS_EVR_TIMER
-#define OS_EVR_TIMER                1
+#define OS_EVR_TIMER                0
 #endif
  
 //     <q>Mutex
 //     <i> Enables Mutex event generation.
 #ifndef OS_EVR_MUTEX
-#define OS_EVR_MUTEX                1
+#define OS_EVR_MUTEX                0
 #endif
  
 //     <q>Semaphore
 //     <i> Enables Semaphore event generation.
 #ifndef OS_EVR_SEMAPHORE
-#define OS_EVR_SEMAPHORE            1
+#define OS_EVR_SEMAPHORE            0
 #endif
  
 //     <q>Memory Pool
 //     <i> Enables Memory Pool event generation.
 #ifndef OS_EVR_MEMPOOL
-#define OS_EVR_MEMPOOL              1
+#define OS_EVR_MEMPOOL              0
 #endif
  
 //     <q>Message Queue

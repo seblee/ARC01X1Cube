@@ -35,6 +35,7 @@
  */
 
 /* Private includes ----------------------------------------------------------*/
+#include <string.h>
 #include "bsp_modbus.h"
 #include "cmsis_os2.h"  // CMSIS RTOS header file
 #include "usart.h"
@@ -47,31 +48,28 @@
 /* Private variables ---------------------------------------------------------*/
 MODBUS_T            ipmMod        = {0};
 const modbusTable_t ipmTable03H[] = {
-  /**id  code   Num reg offset buf**/
-    {1, MOD_03H, 5, 0,  0, 0},
-    {1, MOD_03H, 2, 7,  3, 0},
-    {1, MOD_03H, 7, 12, 4, 0},
-    {1, MOD_03H, 1, 40, 6, 0},
-    {1, MOD_03H, 4, 45, 7, 0},
+  /**id  code    Num     reg offset buf**/
+    {1, MOD_03H, 0x03, 0x0025, 0, 0}, //  IPM_Ux
+    {1, MOD_03H, 0x07, 0x002b, 1, 0}, //  IPM_Ux
+    {1, MOD_03H, 0x04, 0x0036, 2, 0}, //  IPM_Ux
+    {1, MOD_03H, 0x03, 0x003e, 3, 0}, //  IPM_Ux
 };
 #define ipmTable03H_LENGTH sizeof(ipmTable03H) / sizeof(modbusTable_t)
 
 const MOD_VARTab_t ipm_VARTab[] = {
-  /* S   D  Len*/
-    {0,  33, 2}, //  0
-    {2,  37, 1}, //  1
-    {3,  17, 2}, //  2
-    {7,  19, 2}, //  3
-    {12, 16, 1}, //  4
-    {13, 24, 6}, //  5
-    {40, 21, 1}, //  6
-    {45, 40, 4}, //  7
+  /*   S     D  Len*/
+    {0x0025, 50, 3}, //  0
+    {0x002b, 53, 7}, //  1
+    {0x0036, 60, 4}, //  2
+    {0x003e, 66, 1}, //  3
+    {0x003f, 65, 1}, //  4
+    {0x0040, 64, 1}, //  5
 };
 #define ipm_VARTab_LENGTH sizeof(ipm_VARTab) / sizeof(MOD_VARTab_t)
 /* Public variables ----------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
-
+static int U3SendBuf(uint8_t *_buf, uint16_t _len);
 /* Private user code ---------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------
@@ -83,7 +81,6 @@ void ipmTask(void *argument)
     uint8_t i, index, count = 0;
     MODBUS_InitVar(&ipmMod, 1, 19200, WKM_MODBUS_HOST);
     ipmMod.transmit = U3SendBuf;
-    USART3_DIR_RX;
 
     while (1) {
         osDelay(999);  // Insert thread code here...
@@ -97,7 +94,7 @@ void ipmTask(void *argument)
                     count += ipm_VARTab[index].len;
                     p += ipm_VARTab[index].len;
                     index++;
-                } while ((index >= ipm_VARTab_LENGTH) || (count < ipmTable03H[i].Num));
+                } while ((index < ipm_VARTab_LENGTH) && (count < ipmTable03H[i].Num));
                 osDelay(50);
             } else {
                 // time out

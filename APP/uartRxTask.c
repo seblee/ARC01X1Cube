@@ -91,25 +91,25 @@ void uartRxTask(void *argument)
 
     uartDMAStart(&hdma_usart1_rx, &huart1, USART1_Rx_buf, MOD_BUF_SIZE);
     uartDMAStart(&hdma_usart2_rx, &huart2, USART2_Rx_buf, MOD_BUF_SIZE);
+    uartDMAStart(&hdma_usart3_rx, &huart3, USART3_Rx_buf, MOD_BUF_SIZE);
     while (1) {
         osStatus_t status;
         uint32_t   dataOut;
-        status = osMessageQueueGet(mid_MsgRx, &dataOut, NULL, 0U);  // wait for message
+        status = osMessageQueueGet(mid_MsgRx, &dataOut, NULL, 10U);  // wait for message
         if (status == osOK) {
-            uint8_t cache[MOD_BUF_SIZE];
-            int     length;
+            int length;
             if (dataOut == U1RXFLAG) {
                 length = fifo_s_used(&uart1RxFifo);
-                fifo_s_gets(&uart1RxFifo, (char *)cache, length);
-                MODBUS_RxData(&northMod, cache, length);
+                fifo_s_gets(&uart1RxFifo, (char *)northMod.RxBuf, length);
+                MODBUS_RxData(&northMod, northMod.RxBuf, length);
             } else if (dataOut == U2RXFLAG) {
                 length = fifo_s_used(&uart2RxFifo);
-                fifo_s_gets(&uart2RxFifo, (char *)cache, length);
-                MODBUS_RxData(&ACMod, cache, length);
+                fifo_s_gets(&uart2RxFifo, (char *)ACMod.RxBuf, length);
+                MODBUS_RxData(&ACMod, ACMod.RxBuf, length);
             } else if (dataOut == U3RXFLAG) {
                 length = fifo_s_used(&uart3RxFifo);
-                fifo_s_gets(&uart3RxFifo, (char *)cache, length);
-                MODBUS_RxData(&ipmMod, cache, length);
+                fifo_s_gets(&uart3RxFifo, (char *)ipmMod.RxBuf, length);
+                MODBUS_RxData(&ipmMod, ipmMod.RxBuf, length);
             }
         }
     }

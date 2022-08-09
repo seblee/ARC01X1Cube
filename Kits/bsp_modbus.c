@@ -438,10 +438,10 @@ void MODBUS_RxTimeOut(MODBUS_T *_tmod)
  */
 void MODBUS_RxData(MODBUS_T *_tmod, uint8_t *src, uint8_t len)
 {
-    if ((_tmod->RxCount + len) > MOD_BUF_SIZE)
-        _tmod->RxCount = 0;
-    memcpy(_tmod->RxBuf + _tmod->RxCount, src, len);
-    _tmod->RxCount += len;
+    //    if ((_tmod->RxCount + len) > MOD_BUF_SIZE)
+    //        _tmod->RxCount = 0;
+    // memcpy(_tmod->RxBuf + _tmod->RxCount, src, len);
+    _tmod->RxCount       = len;
     _tmod->g_rtu_timeout = 0;
     MODBUS_Poll(_tmod);
 }
@@ -1028,11 +1028,9 @@ uint8_t MODH_WriteParam_10H(MODBUS_T *_tmod, uint8_t _id, uint16_t _reg, uint8_t
 }
 
 /***************************** 安富莱电子 www.armfly.com (END OF FILE) *********************************/
-osThreadId_t  idCache = 0;
 static int8_t waitResponse(uint8_t ModCmd)
 {
     uint32_t Event;
-    idCache = osThreadGetId();
     // osSignalClear(tid_testThread, ModCmd);
     Event = osThreadFlagsWait(ModCmd, osFlagsWaitAny, 200);  // wait for message
     if (Event == osFlagsErrorTimeout) {

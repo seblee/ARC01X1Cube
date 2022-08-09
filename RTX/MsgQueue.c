@@ -8,7 +8,6 @@
 
 osMessageQueueId_t mid_MsgRx;  // message queue id
 
- 
 int Init_MsgQueue(void)
 {
     mid_MsgRx = osMessageQueueNew(MSGQUEUE_OBJECTS, 4, NULL);
@@ -17,5 +16,3 @@ int Init_MsgQueue(void)
     }
     return (0);
 }
- 
- 

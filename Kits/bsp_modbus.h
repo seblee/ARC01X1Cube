@@ -92,7 +92,6 @@ typedef struct {
     uint8_t      g_rtu_timeout;
     osThreadId_t threadId;
     int (*transmit)(uint8_t *_buf, uint16_t _len);
-
 } MODBUS_T;
 
 typedef struct {
