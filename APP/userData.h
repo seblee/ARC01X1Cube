@@ -68,8 +68,17 @@ typedef struct {
 
 #define USART3_DIR_TX HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET)
 #define USART3_DIR_RX HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET)
-/* Private macro -------------------------------------------------------------*/
 
+#define USART4_DIR_TX HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET)
+#define USART4_DIR_RX HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET)
+
+#define USART5_DIR_TX HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET)
+#define USART5_DIR_RX HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET)
+/* Private macro -------------------------------------------------------------*/
+enum {
+    UPS1,
+    UPS2,
+};
 /* Private variables ---------------------------------------------------------*/
 /* Public variables ----------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_usart1_rx;

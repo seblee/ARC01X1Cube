@@ -402,6 +402,11 @@
               <FileType>1</FileType>
               <FilePath>..\APP\ipmTask.c</FilePath>
             </File>
+            <File>
+              <FileName>upsTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\upsTask.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

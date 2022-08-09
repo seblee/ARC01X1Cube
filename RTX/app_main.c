@@ -11,6 +11,7 @@
 #include "app_main.h"
 #include "cmsis_os2.h"
 #include "iwdg.h"
+#include "userData.h"
 
 static const osThreadAttr_t ThreadAttr_start_main = {"app_main", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
 osThreadId_t                northTaskTid;  // thread id
@@ -21,6 +22,10 @@ osThreadId_t                ACTaskTid;  // thread id
 static const osThreadAttr_t ThreadAttr_ACTask = {"ACTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
 osThreadId_t                ipmTaskTid;  // thread id
 static const osThreadAttr_t ThreadAttr_ipmTask = {"ipmTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
+osThreadId_t                ups1TaskTid;  // thread id
+static const osThreadAttr_t ThreadAttr_ups1Task = {"ups1Task", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
+osThreadId_t                ups2TaskTid;  // thread id
+static const osThreadAttr_t ThreadAttr_ups2Task = {"ups2Task", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
 
 /*----------------------------------------------------------------------------
  * Application main thread
@@ -42,6 +47,12 @@ __NO_RETURN static void start_main(void *argument)
     }
     ipmTaskTid = osThreadNew(ipmTask, NULL, &ThreadAttr_ipmTask);
     if (ipmTaskTid == NULL) {
+    }
+    ups1TaskTid = osThreadNew(upsTask, (void *)UPS1, &ThreadAttr_ups1Task);
+    if (ups1TaskTid == NULL) {
+    }
+    ups2TaskTid = osThreadNew(upsTask, (void *)UPS2, &ThreadAttr_ups2Task);
+    if (ups2TaskTid == NULL) {
     }
 
     for (;;) {
