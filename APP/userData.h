@@ -38,7 +38,9 @@
 #define __USERDATA_H
 
 /* Private includes ----------------------------------------------------------*/
-#include "sys.h"
+#include "cmsis_os2.h"  // CMSIS RTOS header file
+#include "fifo.h"
+#include "stm32f1xx_hal.h"
 /* Private typedef -----------------------------------------------------------*/
 typedef struct {
     uint8_t  id;
@@ -84,6 +86,7 @@ enum {
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
+extern DMA_HandleTypeDef hdma_uart4_rx;
 
 extern uint8_t  USART1_Rx_buf[MOD_BUF_SIZE];
 extern uint8_t  USART1_Tx_buf[MOD_BUF_SIZE];
@@ -92,6 +95,13 @@ extern uint8_t  USART2_Tx_buf[MOD_BUF_SIZE];
 extern uint8_t  USART3_Rx_buf[MOD_BUF_SIZE];
 extern uint8_t  USART3_Tx_buf[MOD_BUF_SIZE];
 extern uint16_t modbusVar[MOD_VAR_SIZE];
+
+extern uint8_t  upsRxbuf[2][MOD_BUF_SIZE];
+extern uint8_t  upsTxbuf[2][MOD_BUF_SIZE];
+extern fifo_s_t upsRxFifo[2];
+extern uint8_t  upsRxFifoBuf[2][MOD_BUF_SIZE];
+
+extern osThreadId_t upsTaskTid[2];
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private user code ---------------------------------------------------------*/

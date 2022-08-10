@@ -39,6 +39,7 @@
 #include "upsTask.h"
 #include <stdio.h>
 #include <string.h>
+#include "bsp_user_lib.h"
 #include "fifo.h"
 #include "usart.h"
 #include "userData.h"
@@ -48,10 +49,18 @@
 
 /* Private macro -------------------------------------------------------------*/
 static osStatus_t Q1Pro(uint8_t ups, char *buff, uint8_t len);
+static osStatus_t GOPPro(uint8_t ups, char *buff, uint8_t len);
+static osStatus_t GBATPro(uint8_t ups, char *buff, uint8_t len);
+static osStatus_t BLPro(uint8_t ups, char *buff, uint8_t len);
+static osStatus_t GMODPro(uint8_t ups, char *buff, uint8_t len);
 /* Private variables ---------------------------------------------------------*/
 
 const cmd_ups_t commandMap[] = {
-    {"Q1\r", '(', '\r', 1, Q1Pro}, // UPS_Q1
+    {"Q1\r",   '(', '\r', 46, Q1Pro  }, // UPS_Q1
+    {"GOP\r",  '(', '\r', 34, GOPPro }, //  UPS_GOP
+    {"GBAT\r", '(', '\r', 26, GBATPro}, //  UPS_GBAT
+    {"BL\r",   'B', '\r', 5,  BLPro  }, //  UPS_BL
+    {"GMOD\r", '(', '\r', 2,  GMODPro}, //  UPS_GMOD
 };
 
 /* Private variables ----------------------------------------------------------*/
@@ -65,6 +74,7 @@ uint8_t  upsRxFifoBuf[2][MOD_BUF_SIZE];
 
 /* Private function prototypes ------------------------------------------------*/
 static osStatus_t upsCommand(uint8_t ups, _upsInquiryCmd_t cmd);
+static int        upsSendBuf(uint8_t ups, uint8_t *_buf, uint16_t _len);
 /* Private user code ----------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------
@@ -73,18 +83,31 @@ static osStatus_t upsCommand(uint8_t ups, _upsInquiryCmd_t cmd);
 
 void upsTask(void *argument)
 {
-    uint32_t ups = (uint32_t)argument;
+    uint32_t   ups = (uint32_t)argument;
+    osStatus_t rec;
 
     while (1) {
-        osStatus_t rec;
         osDelay(1000);
         rec = upsCommand(ups, UPS_Q1);
         if (rec == osOK) {
         } else {
         }
+        rec = upsCommand(ups, UPS_GOP);
+        osDelay(10);
+        rec = upsCommand(ups, UPS_GBAT);
+        osDelay(10);
+        rec = upsCommand(ups, UPS_BL);
+        osDelay(10);
+        rec = upsCommand(ups, UPS_GMOD);
+        osDelay(10);
         osThreadYield();  // suspend thread
     }
 }
+// Q1    收←◆ 51 31 0D
+// GOP   收←◆ 47 4F 50 0D
+// GBAT  收←◆ 47 42 41 54 0D
+// BL    收←◆ 42 4C 0D
+// GMOD  收←◆ 47 4D 4F 44 0D
 
 uint32_t upsRXmqClear(void)
 {
@@ -93,7 +116,7 @@ uint32_t upsRXmqClear(void)
 static uint8_t upsRec(uint8_t ups, char *buff, uint32_t timeout)
 {
     uint32_t status;
-    status = osThreadFlagsWait(1, osFlagsWaitAny, 0);
+    status = osThreadFlagsWait(1, osFlagsWaitAny, 800);
     if (status == osFlagsErrorTimeout) {
         return 0;
     } else {
@@ -102,15 +125,10 @@ static uint8_t upsRec(uint8_t ups, char *buff, uint32_t timeout)
         return length;
     }
 }
-static osStatus_t upsSend(uint8_t ups, _upsInquiryCmd_t cmd)
+static int upsSend(uint8_t ups, _upsInquiryCmd_t cmd)
 {
-    if (ups == UPS1) {
-    } else if (ups == UPS2) {
-    } else {
-        return osErrorParameter;
-    }
-    return osOK;
     // return spiMsgQPush((uint8_t *)commandMap[cmd].cmd, strlen(commandMap[cmd].cmd));
+    return upsSendBuf(ups, (uint8_t *)commandMap[cmd].cmd, strlen(commandMap[cmd].cmd));
 }
 
 static osStatus_t upsCommand(uint8_t ups, _upsInquiryCmd_t cmd)
@@ -127,9 +145,9 @@ static osStatus_t upsCommand(uint8_t ups, _upsInquiryCmd_t cmd)
         if (p != NULL) {
             len -= (p - (char *)cache);
             if (len >= commandMap[cmd].bklen) {
-                if (*(p + commandMap[cmd].bklen) == commandMap[cmd].bkEnd)
+                if (*(p + commandMap[cmd].bklen) == commandMap[cmd].bkEnd) {
                     commandMap[cmd].process(ups, p, len);
-                else {
+                } else {
                     // rt_kprintf("ups%d,cmd%d,errLen:%d bklen:%d end:%02x,temp:%s **\r\n", ups, cmd, len, commandMap[cmd].bklen, *(p + commandMap[cmd].bklen), temp);
                     return osError;
                 }
@@ -152,25 +170,6 @@ static osStatus_t upsCommand(uint8_t ups, _upsInquiryCmd_t cmd)
     return osOK;
 }
 
-static osStatus_t Q1Pro(uint8_t ups, char *buff, uint8_t len)
-{
-    float   mmm, nnn, ppp, rrr, sss, ttt;
-    int     qqq           = 0;
-    char    upsStatus[20] = {0};
-    uint8_t i;
-
-    //"(MMM.M NNN.N PPP.P QQQ RR.R S.SS TT.T 76543210\r"
-    sscanf(buff, "(%f %f %f %d %f %f %f %s\r", &mmm, &nnn, &ppp, &qqq, &rrr, &sss, &ttt, upsStatus);
-    modbusVar[15 * ups + 70] = qqq;
-    for (i = 0; i < 8; i++) {
-        modbusVar[15 * ups + 71] <<= 1;
-        modbusVar[15 * ups + 71] |= (upsStatus[i] == '1') ? 1 : 0;
-    }
-    modbusVar[15 * ups + 72] = mmm * 100;
-    modbusVar[15 * ups + 77] = ttt * 10;
-    return osOK;
-}
-
 static int upsSendBuf(uint8_t ups, uint8_t *_buf, uint16_t _len)
 {
     HAL_StatusTypeDef rc = HAL_OK;
@@ -181,7 +180,7 @@ static int upsSendBuf(uint8_t ups, uint8_t *_buf, uint16_t _len)
         rc = HAL_UART_Transmit_DMA(&huart4, upsTxbuf[ups], _len);
     } else if (ups == UPS2) {
         USART5_DIR_TX;  //
-        // rc = HAL_UART_Transmit_DMA(&huart4, upsTxbuf[ups], _len);
+        rc = HAL_UART_Transmit_IT(&huart5, upsTxbuf[ups], _len);
     }
 
     if (rc == HAL_OK) {
@@ -189,4 +188,81 @@ static int upsSendBuf(uint8_t ups, uint8_t *_buf, uint16_t _len)
     } else {
         return -(int)rc;
     }
+}
+
+static osStatus_t Q1Pro(uint8_t ups, char *buff, uint8_t len)
+{
+    float    mmm, nnn, ppp, rrr, sss, ttt;
+    int      qqq           = 0;
+    char     upsStatus[20] = {0};
+    uint8_t  i;
+    uint16_t cache = 0;
+
+    //"(MMM.M NNN.N PPP.P QQQ RR.R S.SS TT.T 76543210\r"
+    sscanf(buff, "(%f %f %f %d %f %f %f %s\r", &mmm, &nnn, &ppp, &qqq, &rrr, &sss, &ttt, upsStatus);
+
+    cache                    = qqq;
+    modbusVar[15 * ups + 70] = BEBufToUint16((uint8_t *)&cache);
+    cache                    = 0;
+    for (i = 0; i < 8; i++) {
+        cache <<= 1;
+        cache |= (upsStatus[i] == '1') ? 1 : 0;
+    }
+    modbusVar[15 * ups + 71] = BEBufToUint16((uint8_t *)&cache);
+    cache                    = mmm * 100;
+    modbusVar[15 * ups + 72] = BEBufToUint16((uint8_t *)&cache);
+    cache                    = ppp * 100;
+    modbusVar[15 * ups + 73] = BEBufToUint16((uint8_t *)&cache);
+    cache                    = ttt * 10;
+    modbusVar[15 * ups + 77] = BEBufToUint16((uint8_t *)&cache);
+
+    return osOK;
+}
+
+static osStatus_t GOPPro(uint8_t ups, char *buff, uint8_t len)
+{
+    float    AAA, BBBB, CCCC;
+    int      DDDD = 0, EEEE = 0, FFFF = 0;
+    uint16_t cache;
+    //"(AAA.A BB.BB CCC.C DDDDD EEEEE FFF\r"
+    sscanf(buff, "(%f %f %f %d %d %d\r", &AAA, &BBBB, &CCCC, &DDDD, &EEEE, &FFFF);
+    cache                    = CCCC * 100;
+    modbusVar[15 * ups + 74] = BEBufToUint16((uint8_t *)&cache);
+    cache                    = BBBB * 10;
+    modbusVar[15 * ups + 75] = BEBufToUint16((uint8_t *)&cache);
+    return osOK;
+}
+
+static osStatus_t GBATPro(uint8_t ups, char *buff, uint8_t len)
+{
+    float    AAA, BBB, DDD, EEE;
+    int      CC = 0;
+    uint16_t cache;
+    //"(AAA.A BBB.BB CC DD.D EE.E\r"
+    sscanf(buff, "(%f %f %d %f %f\r", &AAA, &BBB, &CC, &DDD, &EEE);
+    cache                    = AAA * 100;
+    modbusVar[15 * ups + 76] = BEBufToUint16((uint8_t *)&cache);
+    return osOK;
+}
+
+static osStatus_t BLPro(uint8_t ups, char *buff, uint8_t len)
+{
+    int      AAA = 0;
+    uint16_t cache;
+    //" BLAAA\r"
+    sscanf(buff, "BL%d\r", &AAA);
+    cache                    = AAA;
+    modbusVar[15 * ups + 78] = BEBufToUint16((uint8_t *)&cache);
+    return osOK;
+}
+
+static osStatus_t GMODPro(uint8_t ups, char *buff, uint8_t len)
+{
+    char     M;
+    uint16_t cache;
+    //"(M\r"
+    sscanf(buff, "(%c\r", &M);
+    cache                    = M;
+    modbusVar[15 * ups + 80] = BEBufToUint16((uint8_t *)&cache);
+    return osOK;
 }

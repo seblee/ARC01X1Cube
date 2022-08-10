@@ -22,9 +22,8 @@ osThreadId_t                ACTaskTid;  // thread id
 static const osThreadAttr_t ThreadAttr_ACTask = {"ACTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
 osThreadId_t                ipmTaskTid;  // thread id
 static const osThreadAttr_t ThreadAttr_ipmTask = {"ipmTask", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
-osThreadId_t                ups1TaskTid;  // thread id
+osThreadId_t                upsTaskTid[2];  // thread id
 static const osThreadAttr_t ThreadAttr_ups1Task = {"ups1Task", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
-osThreadId_t                ups2TaskTid;  // thread id
 static const osThreadAttr_t ThreadAttr_ups2Task = {"ups2Task", NULL, NULL, NULL, NULL, NULL, osPriorityNormal, NULL, NULL};
 
 /*----------------------------------------------------------------------------
@@ -48,11 +47,11 @@ __NO_RETURN static void start_main(void *argument)
     ipmTaskTid = osThreadNew(ipmTask, NULL, &ThreadAttr_ipmTask);
     if (ipmTaskTid == NULL) {
     }
-    ups1TaskTid = osThreadNew(upsTask, (void *)UPS1, &ThreadAttr_ups1Task);
-    if (ups1TaskTid == NULL) {
+    upsTaskTid[UPS1] = osThreadNew(upsTask, (void *)UPS1, &ThreadAttr_ups1Task);
+    if (upsTaskTid[UPS1] == NULL) {
     }
-    ups2TaskTid = osThreadNew(upsTask, (void *)UPS2, &ThreadAttr_ups2Task);
-    if (ups2TaskTid == NULL) {
+    upsTaskTid[UPS2] = osThreadNew(upsTask, (void *)UPS2, &ThreadAttr_ups2Task);
+    if (upsTaskTid[UPS2] == NULL) {
     }
 
     for (;;) {

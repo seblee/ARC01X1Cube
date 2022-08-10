@@ -88,10 +88,16 @@ void uartRxTask(void *argument)
     fifo_s_init(&uart2RxFifo, uart2RxFifoBuf, MOD_BUF_SIZE);
     USART3_DIR_RX;
     fifo_s_init(&uart3RxFifo, uart3RxFifoBuf, MOD_BUF_SIZE);
+    USART4_DIR_RX;
+    fifo_s_init(&upsRxFifo[UPS1], upsRxFifoBuf[UPS1], MOD_BUF_SIZE);
+    USART5_DIR_RX;
+    fifo_s_init(&upsRxFifo[UPS2], upsRxFifoBuf[UPS2], MOD_BUF_SIZE);
 
     uartDMAStart(&hdma_usart1_rx, &huart1, USART1_Rx_buf, MOD_BUF_SIZE);
     uartDMAStart(&hdma_usart2_rx, &huart2, USART2_Rx_buf, MOD_BUF_SIZE);
     uartDMAStart(&hdma_usart3_rx, &huart3, USART3_Rx_buf, MOD_BUF_SIZE);
+    uartDMAStart(&hdma_uart4_rx, &huart4, upsRxbuf[UPS1], MOD_BUF_SIZE);
+    HAL_UARTEx_ReceiveToIdle_IT(&huart5, upsRxbuf[UPS2], MOD_BUF_SIZE);
     while (1) {
         osStatus_t status;
         uint32_t   dataOut;
@@ -131,18 +137,24 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         dataIn = U1RXFLAG;
         osMessageQueuePut(mid_MsgRx, &dataIn, 0U, 0U);
         uartDMAStart(&hdma_usart1_rx, &huart1, USART1_Rx_buf, MOD_BUF_SIZE);
-    }
-    if (huart == &huart2) {
+    } else if (huart == &huart2) {
         fifo_s_puts(&uart2RxFifo, (char *)USART2_Rx_buf, Size);  //数据填入 FIFO
         dataIn = U2RXFLAG;
         osMessageQueuePut(mid_MsgRx, &dataIn, 0U, 0U);
         uartDMAStart(&hdma_usart2_rx, &huart2, USART2_Rx_buf, MOD_BUF_SIZE);
-    }
-    if (huart == &huart3) {
+    } else if (huart == &huart3) {
         fifo_s_puts(&uart3RxFifo, (char *)USART3_Rx_buf, Size);  //数据填入 FIFO
         dataIn = U3RXFLAG;
         osMessageQueuePut(mid_MsgRx, &dataIn, 0U, 0U);
         uartDMAStart(&hdma_usart3_rx, &huart3, USART3_Rx_buf, MOD_BUF_SIZE);
+    } else if (huart == &huart4) {
+        fifo_s_puts(&upsRxFifo[UPS1], (char *)upsRxbuf[UPS1], Size);  //数据填入 FIFO
+        osThreadFlagsSet(upsTaskTid[UPS1], 1);
+        uartDMAStart(&hdma_uart4_rx, &huart4, upsRxbuf[UPS1], MOD_BUF_SIZE);
+    } else if (huart == &huart5) {
+        fifo_s_puts(&upsRxFifo[UPS2], (char *)upsRxbuf[UPS2], Size);  //数据填入 FIFO
+        osThreadFlagsSet(upsTaskTid[UPS2], 1);
+        HAL_UARTEx_ReceiveToIdle_IT(&huart5, upsRxbuf[UPS2], MOD_BUF_SIZE);
     }
 }
 
@@ -162,6 +174,10 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
         USART2_DIR_RX;
     } else if (huart == &huart3) {
         USART3_DIR_RX;
+    } else if (huart == &huart4) {
+        USART4_DIR_RX;
+    } else if (huart == &huart5) {
+        USART5_DIR_RX;
     }
     /* NOTE: This function should not be modified, when the callback is needed,
              the HAL_UART_TxCpltCallback could be implemented in the user file
