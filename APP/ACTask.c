@@ -102,10 +102,10 @@ void ACTask(void *argument)
                 } while ((index < AC_VARTab_LENGTH) && (count < ACTable03H[i].Num));
                 osDelay(50);
             } else {
-                // time out
+                osDelay(500);
+                break;
             }
         }
-
         osThreadYield();  // suspend thread
     }
 }

@@ -97,7 +97,8 @@ void ipmTask(void *argument)
                 } while ((index < ipm_VARTab_LENGTH) && (count < ipmTable03H[i].Num));
                 osDelay(50);
             } else {
-                // time out
+                osDelay(500);
+                break;
             }
         }
         osThreadYield();  // suspend thread

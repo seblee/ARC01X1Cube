@@ -91,6 +91,8 @@ void upsTask(void *argument)
         rec = upsCommand(ups, UPS_Q1);
         if (rec == osOK) {
         } else {
+            osDelay(500);
+            continue;
         }
         rec = upsCommand(ups, UPS_GOP);
         osDelay(10);
