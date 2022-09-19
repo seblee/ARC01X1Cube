@@ -56,7 +56,7 @@ static osStatus_t GMODPro(uint8_t ups, char *buff, uint8_t len);
 /* Private variables ---------------------------------------------------------*/
 
 const cmd_ups_t commandMap[] = {
-    {"Q1\r",   '(', '\r', 46, Q1Pro  }, // UPS_Q1
+    {"Q1\r",   '(', '\r', 46, Q1Pro  }, //  UPS_Q1
     {"GOP\r",  '(', '\r', 34, GOPPro }, //  UPS_GOP
     {"GBAT\r", '(', '\r', 26, GBATPro}, //  UPS_GBAT
     {"BL\r",   'B', '\r', 5,  BLPro  }, //  UPS_BL

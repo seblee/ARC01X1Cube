@@ -1,3 +1,4 @@
 .vscode
 MDK-ARM/ARC01X1Cube
 MDK-ARM/*.uvguix.*
+MDK-ARM/JLinkLog.txt
