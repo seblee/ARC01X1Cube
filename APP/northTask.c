@@ -37,6 +37,7 @@
 /* Private includes ----------------------------------------------------------*/
 #include <string.h>
 #include "bsp_modbus.h"
+#include "bsp_user_lib.h"
 #include "cmsis_os2.h"  // CMSIS RTOS header file
 #include "fifo.h"
 #include "usart.h"
@@ -51,7 +52,7 @@
 uint32_t northTaskEvent;
 MODBUS_T northMod = {0};
 
-uint16_t modbusVar[MOD_VAR_SIZE] = {0X1234};
+uint16_t modbusVar[MOD_VAR_SIZE] = {0};
 /* Public variables ----------------------------------------------------------*/
 extern osThreadId_t northTaskTid;
 /* Private function prototypes -----------------------------------------------*/
@@ -64,7 +65,9 @@ static int U1SendBuf(uint8_t *_buf, uint16_t _len);
 
 void northTask(void *argument)
 {
-    MODBUS_InitVar(&northMod, 1, 19200, WKM_MODBUS_DEVICE);
+    uint16_t cache = 33;
+    modbusVar[0]   = BEBufToUint16((uint8_t *)&cache);
+    MODBUS_InitVar(&northMod, 33, 19200, WKM_MODBUS_DEVICE);
     northMod.transmit = U1SendBuf;
     northMod.threadId = northTaskTid;
 

@@ -87,10 +87,26 @@ void upsTask(void *argument)
     osStatus_t rec;
 
     while (1) {
+        static uint8_t errCnt = 0;
         osDelay(1000);
         rec = upsCommand(ups, UPS_Q1);
         if (rec == osOK) {
+            osDelay(10);
+            errCnt = 0;
+            {
+                uint16_t cache = BEBufToUint16((uint8_t *)&modbusVar[1]);
+                cache |= ((uint16_t)0x0010 << ups);
+                modbusVar[1] = BEBufToUint16((uint8_t *)&cache);
+            }
         } else {
+            if (errCnt < 10) {
+                errCnt++;
+            } else {
+                uint16_t cache = BEBufToUint16((uint8_t *)&modbusVar[1]);
+                cache &= ~((uint16_t)0x0010 << ups);
+                modbusVar[1] = BEBufToUint16((uint8_t *)&cache);
+            }
+
             osDelay(500);
             continue;
         }
@@ -200,6 +216,7 @@ static osStatus_t Q1Pro(uint8_t ups, char *buff, uint8_t len)
     uint8_t  i;
     uint16_t cache = 0;
 
+    //"(220.1 220.2 220.3 090 50.1 1.20 25.5 00001111\r"
     //"(MMM.M NNN.N PPP.P QQQ RR.R S.SS TT.T 76543210\r"
     sscanf(buff, "(%f %f %f %d %f %f %f %s\r", &mmm, &nnn, &ppp, &qqq, &rrr, &sss, &ttt, upsStatus);
 
@@ -226,6 +243,7 @@ static osStatus_t GOPPro(uint8_t ups, char *buff, uint8_t len)
     float    AAA, BBBB, CCCC;
     int      DDDD = 0, EEEE = 0, FFFF = 0;
     uint16_t cache;
+    //"(220.0 50.00 010.0 02200 02200 020\r"
     //"(AAA.A BB.BB CCC.C DDDDD EEEEE FFF\r"
     sscanf(buff, "(%f %f %f %d %d %d\r", &AAA, &BBBB, &CCCC, &DDDD, &EEEE, &FFFF);
     cache                    = CCCC * 100;
@@ -240,6 +258,7 @@ static osStatus_t GBATPro(uint8_t ups, char *buff, uint8_t len)
     float    AAA, BBB, DDD, EEE;
     int      CC = 0;
     uint16_t cache;
+    // (220.0 100.00 16 10.0 10.5
     //"(AAA.A BBB.BB CC DD.D EE.E\r"
     sscanf(buff, "(%f %f %d %f %f\r", &AAA, &BBB, &CC, &DDD, &EEE);
     cache                    = AAA * 100;

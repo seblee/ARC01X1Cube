@@ -483,7 +483,7 @@ void MODBUS_Poll(MODBUS_T *_tmod)
             break;
         }
     }
-    if (_tmod->RxCount < 4) {
+    if ((_tmod->RxCount < 4) || (_tmod->RxCount <= i)) {
         goto err_ret;
     }
     /* 计算CRC校验和 */

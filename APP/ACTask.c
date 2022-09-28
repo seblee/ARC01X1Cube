@@ -74,7 +74,7 @@ const MOD_VARTab_t AC_VARTab[] = {
 /* Public variables ----------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
-static int U2SendBuf(uint8_t *_buf, uint16_t _len);
+static int U3SendBuf(uint8_t *_buf, uint16_t _len);
 /* Private user code ---------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------
@@ -85,7 +85,7 @@ void ACTask(void *argument)
 {
     uint8_t i, index, count = 0;
     MODBUS_InitVar(&ACMod, 1, 19200, WKM_MODBUS_HOST);
-    ACMod.transmit = U2SendBuf;
+    ACMod.transmit = U3SendBuf;
 
     while (1) {
         osDelay(999);  // Insert thread code here...
@@ -110,12 +110,12 @@ void ACTask(void *argument)
     }
 }
 
-static int U2SendBuf(uint8_t *_buf, uint16_t _len)
+static int U3SendBuf(uint8_t *_buf, uint16_t _len)
 {
     HAL_StatusTypeDef rc;
-    USART2_DIR_TX;  // 485_DIR2
-    memcpy(USART2_Tx_buf, _buf, _len);
-    rc = HAL_UART_Transmit_DMA(&huart2, USART2_Tx_buf, _len);
+    USART3_DIR_TX;  // 485_DIR3
+    memcpy(USART3_Tx_buf, _buf, _len);
+    rc = HAL_UART_Transmit_DMA(&huart3, USART3_Tx_buf, _len);
 
     if (rc == HAL_OK) {
         return (int)_len;

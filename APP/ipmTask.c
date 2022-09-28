@@ -37,6 +37,7 @@
 /* Private includes ----------------------------------------------------------*/
 #include <string.h>
 #include "bsp_modbus.h"
+#include "bsp_user_lib.h"
 #include "cmsis_os2.h"  // CMSIS RTOS header file
 #include "usart.h"
 /* Private typedef -----------------------------------------------------------*/
@@ -69,7 +70,7 @@ const MOD_VARTab_t ipm_VARTab[] = {
 /* Public variables ----------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
-static int U3SendBuf(uint8_t *_buf, uint16_t _len);
+static int U2SendBuf(uint8_t *_buf, uint16_t _len);
 /* Private user code ---------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------
@@ -80,9 +81,10 @@ void ipmTask(void *argument)
 {
     uint8_t i, index, count = 0;
     MODBUS_InitVar(&ipmMod, 1, 19200, WKM_MODBUS_HOST);
-    ipmMod.transmit = U3SendBuf;
+    ipmMod.transmit = U2SendBuf;
 
     while (1) {
+        static uint8_t errCnt = 0;
         osDelay(999);  // Insert thread code here...
         for (i = 0; i < ipmTable03H_LENGTH; i++) {
             if (MODH_ReadParam_03H(&ipmMod, ipmTable03H[i].id, ipmTable03H[i].Reg, ipmTable03H[i].Num) == 1) {
@@ -96,8 +98,22 @@ void ipmTask(void *argument)
                     index++;
                 } while ((index < ipm_VARTab_LENGTH) && (count < ipmTable03H[i].Num));
                 osDelay(50);
+                errCnt = 0;
+                {
+                    uint16_t cache = BEBufToUint16((uint8_t *)&modbusVar[1]);
+                    cache |= ((uint16_t)1 << 3); 
+                    modbusVar[1] = BEBufToUint16((uint8_t *)&cache);
+                }
             } else {
                 osDelay(500);
+                if (errCnt < 10) {
+                    errCnt++;
+                } else {
+                    uint16_t cache = BEBufToUint16((uint8_t *)&modbusVar[1]);
+                    cache &= ~((uint16_t)1 << 3);
+                    modbusVar[1] = BEBufToUint16((uint8_t *)&cache);
+                }
+
                 break;
             }
         }
@@ -105,12 +121,12 @@ void ipmTask(void *argument)
     }
 }
 
-static int U3SendBuf(uint8_t *_buf, uint16_t _len)
+static int U2SendBuf(uint8_t *_buf, uint16_t _len)
 {
     HAL_StatusTypeDef rc;
-    USART3_DIR_TX;  // 485_DIR3
-    memcpy(USART3_Tx_buf, _buf, _len);
-    rc = HAL_UART_Transmit_DMA(&huart3, USART3_Tx_buf, _len);
+    USART2_DIR_TX;  // 485_DIR2
+    memcpy(USART2_Tx_buf, _buf, _len);
+    rc = HAL_UART_Transmit_DMA(&huart2, USART2_Tx_buf, _len);
 
     if (rc == HAL_OK) {
         return (int)_len;

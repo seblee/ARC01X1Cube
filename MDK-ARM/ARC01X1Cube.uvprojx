@@ -393,11 +393,6 @@
               <FilePath>..\APP\uartRxTask.c</FilePath>
             </File>
             <File>
-              <FileName>ACTask.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\APP\ACTask.c</FilePath>
-            </File>
-            <File>
               <FileName>ipmTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\APP\ipmTask.c</FilePath>

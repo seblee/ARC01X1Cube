@@ -67,7 +67,7 @@ uint8_t  uart3RxFifoBuf[MOD_BUF_SIZE];
 
 /* Public variables ----------------------------------------------------------*/
 extern MODBUS_T northMod;
-extern MODBUS_T ACMod;
+// extern MODBUS_T ACMod;
 extern MODBUS_T ipmMod;
 
 extern osMessageQueueId_t mid_MsgRx;
@@ -110,12 +110,12 @@ void uartRxTask(void *argument)
                 MODBUS_RxData(&northMod, northMod.RxBuf, length);
             } else if (dataOut == U2RXFLAG) {
                 length = fifo_s_used(&uart2RxFifo);
-                fifo_s_gets(&uart2RxFifo, (char *)ACMod.RxBuf, length);
-                MODBUS_RxData(&ACMod, ACMod.RxBuf, length);
+                fifo_s_gets(&uart2RxFifo, (char *)ipmMod.RxBuf, length);
+                MODBUS_RxData(&ipmMod, ipmMod.RxBuf, length);
             } else if (dataOut == U3RXFLAG) {
                 length = fifo_s_used(&uart3RxFifo);
-                fifo_s_gets(&uart3RxFifo, (char *)ipmMod.RxBuf, length);
-                MODBUS_RxData(&ipmMod, ipmMod.RxBuf, length);
+                // fifo_s_gets(&uart3RxFifo, (char *)ACMod.RxBuf, length);
+                // MODBUS_RxData(&ACMod, ACMod.RxBuf, length);
             }
         }
     }
