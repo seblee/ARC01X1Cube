@@ -57,5 +57,6 @@ void uartRxTask(void *argument);
 void ipmTask(void *argument);
 void upsTask(void *argument);
 int  Init_MsgQueue(void);
+int  Init_Mutex(void);
 
 #endif

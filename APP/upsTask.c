@@ -93,20 +93,16 @@ void upsTask(void *argument)
         if (rec == osOK) {
             osDelay(10);
             errCnt = 0;
-            {
-                uint16_t cache = BEBufToUint16((uint8_t *)&modbusVar[1]);
-                cache |= ((uint16_t)0x0010 << ups);
-                modbusVar[1] = BEBufToUint16((uint8_t *)&cache);
-            }
+            deviceStatus(ups + 4, 1);
         } else {
             if (errCnt < 10) {
                 errCnt++;
+            } else if (errCnt == 10) {
+                errCnt++;
+                memset(&modbusVar[70 + 15 * ups], 0, 30);
             } else {
-                uint16_t cache = BEBufToUint16((uint8_t *)&modbusVar[1]);
-                cache &= ~((uint16_t)0x0010 << ups);
-                modbusVar[1] = BEBufToUint16((uint8_t *)&cache);
+                deviceStatus(ups + 4, 0);
             }
-
             osDelay(500);
             continue;
         }

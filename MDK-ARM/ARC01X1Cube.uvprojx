@@ -417,6 +417,11 @@
               <FileType>1</FileType>
               <FilePath>..\RTX\MsgQueue.c</FilePath>
             </File>
+            <File>
+              <FileName>Mutex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\RTX\Mutex.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

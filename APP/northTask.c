@@ -55,6 +55,7 @@ MODBUS_T northMod = {0};
 uint16_t modbusVar[MOD_VAR_SIZE] = {0};
 /* Public variables ----------------------------------------------------------*/
 extern osThreadId_t northTaskTid;
+extern osMutexId_t  mid_Mutex;  // mutex id
 /* Private function prototypes -----------------------------------------------*/
 
 static int U1SendBuf(uint8_t *_buf, uint16_t _len);
@@ -93,3 +94,25 @@ static int U1SendBuf(uint8_t *_buf, uint16_t _len)
         return -(int)rc;
     }
 }
+
+void deviceStatus(uint8_t bits, uint8_t value)
+{
+    uint16_t cache;
+
+    osMutexAcquire(mid_Mutex, osWaitForever);
+    cache = BEBufToUint16((uint8_t *)&modbusVar[1]);
+    if (value) {
+        cache |= (1 << bits);
+    } else {
+        cache &= ~(1 << bits);
+    }
+    modbusVar[1] = BEBufToUint16((uint8_t *)&cache);
+    osMutexRelease(mid_Mutex);
+}
+
+// void modbusVarVauleSet(uint8_t index, uint16_t value)
+// {
+//     osMutexAcquire(mid_Mutex, osWaitForever);
+//     modbusVar[index] = BEBufToUint16((uint8_t *)&value);
+//     osMutexRelease(mid_Mutex);
+// }

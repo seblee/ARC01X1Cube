@@ -99,19 +99,16 @@ void ipmTask(void *argument)
                 } while ((index < ipm_VARTab_LENGTH) && (count < ipmTable03H[i].Num));
                 osDelay(50);
                 errCnt = 0;
-                {
-                    uint16_t cache = BEBufToUint16((uint8_t *)&modbusVar[1]);
-                    cache |= ((uint16_t)1 << 3); 
-                    modbusVar[1] = BEBufToUint16((uint8_t *)&cache);
-                }
+                deviceStatus(3, 1);
             } else {
                 osDelay(500);
                 if (errCnt < 10) {
                     errCnt++;
+                } else if (errCnt == 10) {
+                    memset(&modbusVar[50], 0, 40);
+                    errCnt++;
                 } else {
-                    uint16_t cache = BEBufToUint16((uint8_t *)&modbusVar[1]);
-                    cache &= ~((uint16_t)1 << 3);
-                    modbusVar[1] = BEBufToUint16((uint8_t *)&cache);
+                    deviceStatus(3, 0);
                 }
 
                 break;

@@ -35,6 +35,7 @@ __NO_RETURN static void start_main(void *argument)
     // ...
 
     Init_MsgQueue();
+    Init_Mutex();
     northTaskTid = osThreadNew(northTask, NULL, &ThreadAttr_northTask);
     if (northTaskTid == NULL) {
     }

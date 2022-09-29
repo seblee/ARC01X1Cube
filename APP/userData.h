@@ -103,7 +103,7 @@ extern uint8_t  upsRxFifoBuf[2][MOD_BUF_SIZE];
 
 extern osThreadId_t upsTaskTid[2];
 /* Private function prototypes -----------------------------------------------*/
-
+void deviceStatus(uint8_t bits, uint8_t value);
 /* Private user code ---------------------------------------------------------*/
 
 #endif
