@@ -87,18 +87,18 @@ void upsTask(void *argument)
     osStatus_t rec;
 
     while (1) {
-        static uint8_t errCnt = 0;
+        static uint8_t errCnt[2] = {0};
         osDelay(1000);
         rec = upsCommand(ups, UPS_Q1);
         if (rec == osOK) {
             osDelay(10);
-            errCnt = 0;
+            errCnt[ups] = 0;
             deviceStatus(ups + 4, 1);
         } else {
-            if (errCnt < 10) {
-                errCnt++;
-            } else if (errCnt == 10) {
-                errCnt++;
+            if (errCnt[ups] < 10) {
+                errCnt[ups]++;
+            } else if (errCnt[ups] == 10) {
+                errCnt[ups]++;
                 memset(&modbusVar[70 + 15 * ups], 0, 30);
             } else {
                 deviceStatus(ups + 4, 0);
