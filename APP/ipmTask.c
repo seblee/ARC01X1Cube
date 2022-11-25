@@ -110,7 +110,6 @@ void ipmTask(void *argument)
                 } else {
                     deviceStatus(3, 0);
                 }
-
                 break;
             }
         }

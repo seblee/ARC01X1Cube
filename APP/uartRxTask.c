@@ -143,7 +143,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         osMessageQueuePut(mid_MsgRx, &dataIn, 0U, 0U);
         uartDMAStart(&hdma_usart2_rx, &huart2, USART2_Rx_buf, MOD_BUF_SIZE);
     } else if (huart == &huart3) {
-        fifo_s_puts(&uart3RxFifo, (char *)USART3_Rx_buf, Size);  //数据填入 FIFO
+        //fifo_s_puts(&uart3RxFifo, (char *)USART3_Rx_buf, Size);  //数据填入 FIFO
         dataIn = U3RXFLAG;
         osMessageQueuePut(mid_MsgRx, &dataIn, 0U, 0U);
         uartDMAStart(&hdma_usart3_rx, &huart3, USART3_Rx_buf, MOD_BUF_SIZE);
@@ -182,4 +182,32 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     /* NOTE: This function should not be modified, when the callback is needed,
              the HAL_UART_TxCpltCallback could be implemented in the user file
      */
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+    /* Prevent unused argument(s) compilation warning */
+    UNUSED(huart);
+    /* NOTE: This function should not be modified, when the callback is needed,
+             the HAL_UART_ErrorCallback could be implemented in the user file
+     */
+    if (HAL_UART_GetError(huart) & HAL_UART_ERROR_ORE) {
+        __HAL_UART_FLUSH_DRREGISTER(huart);  //读DR寄存器，就可以清除ORE错误标志位
+    }
+    if (huart == &huart1) {
+        uartDMAStart(&hdma_usart1_rx, &huart1, USART1_Rx_buf, MOD_BUF_SIZE);
+        USART1_DIR_RX;
+    } else if (huart == &huart2) {
+        uartDMAStart(&hdma_usart2_rx, &huart2, USART2_Rx_buf, MOD_BUF_SIZE);
+        USART2_DIR_RX;
+    } else if (huart == &huart3) {
+        uartDMAStart(&hdma_usart3_rx, &huart3, USART3_Rx_buf, MOD_BUF_SIZE);
+        USART3_DIR_RX;
+    } else if (huart == &huart4) {
+        uartDMAStart(&hdma_uart4_rx, &huart4, upsRxbuf[UPS1], MOD_BUF_SIZE);
+        USART4_DIR_RX;
+    } else if (huart == &huart5) {
+        HAL_UARTEx_ReceiveToIdle_IT(&huart5, upsRxbuf[UPS2], MOD_BUF_SIZE);
+        USART5_DIR_RX;
+    }
 }

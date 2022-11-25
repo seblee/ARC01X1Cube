@@ -148,7 +148,7 @@ static int upsSend(uint8_t ups, _upsInquiryCmd_t cmd)
 static osStatus_t upsCommand(uint8_t ups, _upsInquiryCmd_t cmd)
 {
     uint8_t len;
-    char    cache[128] = {0};
+    char    cache[320] = {0};
     // rt_kprintf("ups%d,cmd%d**\r\n", ups, cmd, len);
     upsRXmqClear();
     upsSend(ups, cmd);
@@ -212,9 +212,9 @@ static osStatus_t Q1Pro(uint8_t ups, char *buff, uint8_t len)
     uint8_t  i;
     uint16_t cache = 0;
 
-    //"(220.1 220.2 220.3 090 50.1 1.20 25.5 00001111\r"
+    //"(220.1 220.2 220.3 090 50.1 1.20 25.5 00001111\r" 51 31 0D
     //"(MMM.M NNN.N PPP.P QQQ RR.R S.SS TT.T 76543210\r"
-    sscanf(buff, "(%f %f %f %d %f %f %f %s\r", &mmm, &nnn, &ppp, &qqq, &rrr, &sss, &ttt, upsStatus);
+    sscanf(buff, "(%f %f %f %d %f %f %f %8s\r", &mmm, &nnn, &ppp, &qqq, &rrr, &sss, &ttt, upsStatus);
 
     cache                    = qqq;
     modbusVar[15 * ups + 70] = BEBufToUint16((uint8_t *)&cache);
@@ -239,7 +239,7 @@ static osStatus_t GOPPro(uint8_t ups, char *buff, uint8_t len)
     float    AAA, BBBB, CCCC;
     int      DDDD = 0, EEEE = 0, FFFF = 0;
     uint16_t cache;
-    //"(220.0 50.00 010.0 02200 02200 020\r"
+    //"(220.0 50.00 010.0 02200 02200 020\r" 47 4f 50 0d
     //"(AAA.A BB.BB CCC.C DDDDD EEEEE FFF\r"
     sscanf(buff, "(%f %f %f %d %d %d\r", &AAA, &BBBB, &CCCC, &DDDD, &EEEE, &FFFF);
     cache                    = CCCC * 100;
@@ -254,7 +254,7 @@ static osStatus_t GBATPro(uint8_t ups, char *buff, uint8_t len)
     float    AAA, BBB, DDD, EEE;
     int      CC = 0;
     uint16_t cache;
-    // (220.0 100.00 16 10.0 10.5
+    // (220.0 100.00 16 10.0 10.5\r 47 42 41 54 0D
     //"(AAA.A BBB.BB CC DD.D EE.E\r"
     sscanf(buff, "(%f %f %d %f %f\r", &AAA, &BBB, &CC, &DDD, &EEE);
     cache                    = AAA * 100;
@@ -266,7 +266,7 @@ static osStatus_t BLPro(uint8_t ups, char *buff, uint8_t len)
 {
     int      AAA = 0;
     uint16_t cache;
-    //" BLAAA\r"
+    //" BLAAA\r"   42 4C 0D
     sscanf(buff, "BL%d\r", &AAA);
     cache                    = AAA;
     modbusVar[15 * ups + 78] = BEBufToUint16((uint8_t *)&cache);
@@ -277,7 +277,7 @@ static osStatus_t GMODPro(uint8_t ups, char *buff, uint8_t len)
 {
     char     M;
     uint16_t cache;
-    //"(M\r"
+    //"(M\r" 47 4D 4F 44 0D
     sscanf(buff, "(%c\r", &M);
     cache                    = M;
     modbusVar[15 * ups + 80] = BEBufToUint16((uint8_t *)&cache);
