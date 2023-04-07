@@ -39,7 +39,6 @@ BraceWrapping:
   SplitEmptyNamespace: false
 
 
-IncludeBlocks:   Preserve
 IncludeCategories: 
   - Regex:           '^<ext/.*\.h>'
     Priority:        2
